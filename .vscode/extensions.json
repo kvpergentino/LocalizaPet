@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "batisteo.vscode-django",
+    "zignd.html-css-class-completion",
+    "formulahendry.auto-rename-tag",
+    "qwtel.sqlite-viewer",
+    "eamodio.gitlens",
+    "ms-vsliveshare.vsliveshare"
+  ]
+}
