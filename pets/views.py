@@ -20,7 +20,7 @@ def cadastrar_pet(request):
         if form.is_valid():
             # commit=False cria o objeto na memória mas não salva no banco ainda
             pet = form.save(commit=False)
-            # Vinculamos o animal ao usuário que está enviando o formulário
+            # Vincula o animal ao usuário que está enviando o formulário
             pet.usuario = request.user
             pet.save()
             messages.success(request, "Alerta publicado com sucesso!")
@@ -70,7 +70,7 @@ def detalhes_pet(request, pet_id):
     pet = get_object_or_404(Pet, id=pet_id)
     return render(request, 'core/detalhes_pet.html', {'pet': pet})
 
-#  Adicione esta função no final do arquivo views_pets.py
+
 
 def detalhes_pet(request, pet_id):
     """
@@ -97,3 +97,39 @@ def detalhes_pet(request, pet_id):
     }
     
     return render(request, 'detalhes.html', context)
+
+
+#Função para editar o pet (apenas para o dono)
+@login_required(login_url='login')
+def editar_pet(request, pet_id):
+    """
+    Permite que o dono edite o anúncio do pet
+    """
+    pet = get_object_or_404(Animal, id=pet_id, usuario=request.user)
+    
+    if request.method == 'POST':
+        form = AnimalForm(request.POST, request.FILES, instance=pet)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Anúncio atualizado com sucesso!")
+            return redirect('detalhes_pet', pet_id=pet.id)
+    else:
+        form = AnimalForm(instance=pet)
+    
+    return render(request, 'editar.html', {'form': form, 'pet': pet})
+
+
+#Função para deletar o pet (apenas para o dono)
+@login_required(login_url='login')
+def deletar_pet(request, pet_id):
+    """
+    Permite que o dono remova o anúncio do pet
+    """
+    pet = get_object_or_404(Animal, id=pet_id, usuario=request.user)
+    
+    if request.method == 'POST':
+        pet.delete()
+        messages.success(request, "Anúncio removido com sucesso!")
+        return redirect('home')
+    
+    return render(request, 'deletar_anuncio.html', {'pet': pet})

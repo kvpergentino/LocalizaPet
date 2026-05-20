@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="max-w-4xl mx-auto px-6 py-12">
+    <div class="bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden">
+        <div class="btn-primary-gradient px-8 py-6">
+            <h2 class="text-2xl font-bold text-on-primary font-headline">Editar Anúncio</h2>
+            <p class="text-on-primary/80">Editando: {{ pet.nome|default:"Pet sem nome" }}</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="p-8 space-y-6">
+            {% csrf_token %}
+            {{ form.as_p }}
+            
+            <div class="flex justify-end gap-4 pt-4">
+                <a href="{% url 'detalhes_pet' pet.id %}" class="px-6 py-2 rounded-lg border border-outline-variant/30 hover:bg-surface-container-low transition-colors">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn-primary-gradient text-on-primary px-8 py-2 rounded-lg font-bold">
+                    Salvar Alterações
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
