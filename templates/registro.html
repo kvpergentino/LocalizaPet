@@ -8,7 +8,7 @@
             <p class="text-on-primary/80 mt-1">Junte-se à nossa rede de solidariedade.</p>
         </div>
 
-        <form method="POST" class="p-8 space-y-6">
+        <form method="POST" class="p-8 space-y-6">python manage.py migrate
             {% csrf_token %}
             <div class="space-y-4 auth-form">
                 {{ form.as_p }}
