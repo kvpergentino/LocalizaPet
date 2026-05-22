@@ -19,7 +19,7 @@ class AnimalForm(forms.ModelForm):
             }),
             'nome': forms.TextInput(attrs={
                 'class': 'w-full rounded-lg border-outline-variant/30 bg-surface p-2.5 text-on-surface',
-                'placeholder': 'Ex: Mio',
+                'placeholder': 'Ex: Rex',
             }),
             'especie': forms.Select(attrs={
                 'class': 'w-full rounded-lg border-outline-variant/30 bg-surface p-2.5 text-on-surface',
