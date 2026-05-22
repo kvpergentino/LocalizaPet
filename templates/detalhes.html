@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto px-6 py-12">
+    <!-- Breadcrumb -->
+    <div class="mb-8 flex items-center gap-2 text-sm text-on-surface-variant">
+        <a href="{% url 'home' %}" class="hover:text-primary transition-colors">Home</a>
+        <span class="material-symbols-outlined text-sm">chevron_right</span>
+        <span class="font-medium text-on-surface">Detalhes do Pet</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        
+        <!-- Coluna da Esquerda: Foto do Pet -->
+        <div class="space-y-6">
+            <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant/10 shadow-lg">
+                <div class="relative h-96 lg:h-[500px] bg-surface-container-low flex items-center justify-center">
+                    {% if pet.foto %}
+                        <img src="{{ pet.foto.url }}" alt="{{ pet.nome|default:'Pet' }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="text-center">
+                            <span class="material-symbols-outlined text-8xl text-outline">pets</span>
+                            <p class="text-outline mt-2">Sem foto disponível</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Badge de Status -->
+                    <div class="absolute top-4 left-4">
+                        <span class="{% if pet.status == 'perdido' %}bg-error text-on-error{% else %}bg-secondary text-on-secondary{% endif %} px-5 py-2 rounded-full text-sm font-bold font-headline uppercase tracking-wider shadow-lg">
+                            {{ pet.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ações (apenas para o dono) -->
+            {% if is_owner %}
+            <div class="flex gap-4">
+                <a href="{% url 'editar_pet' pet.id %}" class="flex-1 bg-primary text-on-primary px-6 py-3 rounded-xl font-bold text-center hover:opacity-90 transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">edit</span>
+                    Editar Anúncio
+                </a>
+                <a href="{% url 'deletar_pet' pet.id %}" class="flex-1 bg-error/10 text-error px-6 py-3 rounded-xl font-bold text-center hover:bg-error/20 transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">delete</span>
+                    Remover
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Coluna da Direita: Informações do Pet -->
+        <div class="space-y-8">
+            <!-- Título -->
+            <div>
+                <h1 class="font-headline text-4xl md:text-5xl font-bold text-on-surface mb-3">
+                    {{ pet.nome|default:"Pet sem nome" }}
+                </h1>
+                <p class="text-xl text-primary font-medium">{{ pet.get_especie_display }}</p>
+            </div>
+
+            <!-- Informações Rápidas -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-surface-container-low rounded-xl p-4 text-center">
+                    <span class="material-symbols-outlined text-3xl text-primary">pets</span>
+                    <p class="text-sm text-on-surface-variant mt-1">Espécie</p>
+                    <p class="font-bold text-on-surface">{{ pet.get_especie_display }}</p>
+                </div>
+                <div class="bg-surface-container-low rounded-xl p-4 text-center">
+                    <span class="material-symbols-outlined text-3xl text-primary">calendar_today</span>
+                    <p class="text-sm text-on-surface-variant mt-1">Anúncio</p>
+                    <p class="font-bold text-on-surface">{{ pet.id|stringformat:"i" }}</p>
+                </div>
+            </div>
+
+            <!-- Cores -->
+            <div class="border-b border-outline-variant/20 pb-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-primary">palette</span>
+                    <h2 class="text-xl font-bold text-on-surface">Cores do Animal</h2>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    {% if cores_list %}
+                        {% for cor in cores_list %}
+                            <span class="bg-surface-container-high px-4 py-2 rounded-full text-sm font-medium text-on-surface-variant">
+                                {% if cor == 'preto' %}⚫ {{ cor|title }}
+                                {% elif cor == 'branco' %}⚪ {{ cor|title }}
+                                {% elif cor == 'marrom' %}🟤 {{ cor|title }}
+                                {% elif cor == 'cinza' %}🐘 {{ cor|title }}
+                                {% elif cor == 'amarelo' %}🟡 {{ cor|title }}
+                                {% elif cor == 'creme' %}🍦 {{ cor|title }}
+                                {% elif cor == 'caramelo' %}🍬 {{ cor|title }}
+                                {% else %}🎨 {{ cor|title }}
+                                {% endif %}
+                            </span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-on-surface-variant">Não informado</span>
+                    {% endif %}
+                </div>
+                {% if pet.mais_de_uma_cor %}
+                    <p class="text-sm text-on-surface-variant mt-3 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">info</span>
+                        Possui marcações de múltiplas cores
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Localização -->
+            <div class="border-b border-outline-variant/20 pb-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-primary">location_on</span>
+                    <h2 class="text-xl font-bold text-on-surface">Localização</h2>
+                </div>
+                <div class="space-y-2">
+                    <p class="text-on-surface">
+                        <span class="font-medium">CEP:</span> {{ pet.cep|default:"Não informado" }}
+                    </p>
+                    <p class="text-on-surface">
+                        <span class="font-medium">Bairro:</span> {{ pet.bairro|default:"Não informado" }}
+                    </p>
+                    <p class="text-on-surface">
+                        <span class="font-medium">Cidade/UF:</span> {{ pet.cidade|default:"-" }}/{{ pet.uf|default:"-" }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="pt-4 space-y-4">
+                <a href="https://wa.me/5511999999999?text=Olá! Vi o anúncio do pet {{ pet.nome|default:'desaparecido' }} e tenho informações que podem ajudar." 
+                   class="w-full bg-[#25D366] text-white px-6 py-4 rounded-xl font-bold text-center hover:opacity-90 transition-all flex items-center justify-center gap-3 shadow-lg">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="w-6 h-6">
+                    Compartilhar no WhatsApp
+                </a>
+                
+                <div class="flex gap-4">
+                    <button onclick="window.location.href='{% url 'home' %}'" class="flex-1 border border-outline-variant/30 text-secondary px-6 py-3 rounded-xl font-bold hover:bg-surface-container-low transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                        Voltar para Home
+                    </button>
+                    
+                    <button onclick="window.print()" class="flex-1 border border-outline-variant/30 text-secondary px-6 py-3 rounded-xl font-bold hover:bg-surface-container-low transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">print</span>
+                        Imprimir
+                    </button>
+                </div>
+            </div>
+
+            <!-- Informações de Segurança -->
+            <div class="bg-warning/10 border border-warning/20 rounded-xl p-4 mt-6">
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-warning">security</span>
+                    <div class="text-sm">
+                        <p class="font-bold text-warning-dark">⚠️ Dica de Segurança</p>
+                        <p class="text-on-surface-variant">Ao entrar em contato com o responsável pelo anúncio, compartilhe apenas informações úteis sobre o pet. Encontros para entrega devem ser em locais públicos e movimentados.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

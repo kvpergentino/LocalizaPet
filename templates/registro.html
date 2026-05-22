@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="max-w-md mx-auto px-6 py-12">
+    <div class="bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden border border-outline-variant/10">
+        <div class="btn-primary-gradient px-8 py-6">
+            <h2 class="text-2xl font-bold text-on-primary font-headline">Criar Conta</h2>
+            <p class="text-on-primary/80 mt-1">Junte-se à nossa rede de solidariedade.</p>
+        </div>
+
+        <form method="POST" class="p-8 space-y-6">
+            {% csrf_token %}
+            <div class="space-y-4 auth-form">
+                {{ form.as_p }}
+            </div>
+            <button type="submit" class="w-full btn-primary-gradient text-on-primary py-3 rounded-xl font-headline font-bold shadow-lg hover:opacity-90 transition-all">
+                Finalizar Cadastro
+            </button>
+            <p class="text-center text-sm text-on-surface-variant">
+                Já tem uma conta? <a href="{% url 'login' %}" class="text-primary font-bold">Entrar aqui</a>
+            </p>
+        </form>
+    </div>
+</section>
+
+<style>
+    .auth-form p { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+    .auth-form input { border-radius: 0.75rem; border: 1px solid #c1c6d5; padding: 0.75rem; background: #f9f9ff; }
+    .auth-form .helptext { font-size: 0.75rem; color: #717785; }
+</style>
+{% endblock %}
