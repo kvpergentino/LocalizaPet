@@ -170,3 +170,175 @@
     }
 </style>
 {% endblock %}
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="max-w-4xl mx-auto px-6 py-12">
+    <div class="bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden border border-outline-variant/10">
+        
+        <div class="btn-primary-gradient px-8 py-6">
+            <h2 class="text-2xl font-bold text-on-primary font-headline">Cadastrar Novo Alerta</h2>
+            <p class="text-on-primary/80 mt-1">Ajude a comunidade fornecendo informações precisas para facilitar o reencontro.</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="p-8 space-y-8">
+            {% csrf_token %}
+            
+            <div>
+                <h3 class="text-lg font-bold text-on-surface mb-4 border-b border-outline-variant/20 pb-2">Informações do Pet</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex flex-col">
+                        <label class="text-sm font-bold text-on-surface-variant mb-2">Status do Registro *</label>
+                        {{ form.status }}
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-sm font-bold text-on-surface-variant mb-2">Espécie *</label>
+                        {{ form.especie }}
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-sm font-bold text-on-surface-variant mb-2">Nome do Animal (se souber)</label>
+                        {{ form.nome }}
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-sm font-bold text-on-surface-variant mb-2">Foto do Pet</label>
+                        {{ form.foto }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/20">
+                <label class="block text-sm font-bold text-on-surface-variant mb-4">Selecione as Cores Principais *</label>
+                <div class="cores-wrapper">
+                    {{ form.cores }}
+                </div>
+                <div class="mt-6 flex items-center gap-3 pt-4 border-t border-outline-variant/20">
+                    {{ form.mais_de_uma_cor }}
+                    <label for="{{ form.mais_de_uma_cor.id_for_label }}" class="text-sm font-medium text-on-surface-variant cursor-pointer">Este animal possui marcações evidentes de mais de uma cor?</label>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-bold text-on-surface mb-4 border-b border-outline-variant/20 pb-2">Localização</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="md:col-span-1 flex flex-col">
+                        <label class="text-sm font-bold text-on-surface-variant mb-2">CEP *</label>
+                        {{ form.cep }}
+                        <span id="cep-error" class="text-xs text-error mt-1 hidden font-medium">CEP não encontrado.</span>
+                    </div>
+                    <div class="md:col-span-1 flex flex-col">
+                        <label class="text-sm font-bold text-on-surface-variant mb-2">Bairro</label>
+                        {{ form.bairro }}
+                    </div>
+                    <div class="md:col-span-1 flex flex-col">
+                        <label class="text-sm font-bold text-on-surface-variant mb-2">Cidade</label>
+                        {{ form.cidade }}
+                    </div>
+                    <div class="md:col-span-1 flex flex-col">
+                        <label class="text-sm font-bold text-on-surface-variant mb-2">UF</label>
+                        {{ form.uf }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-4 pt-4 border-t border-outline-variant/20">
+                <a href="{% url 'home' %}" class="px-8 py-3 rounded-xl border border-outline-variant/30 text-secondary font-bold hover:bg-surface-container-low transition-all">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn-primary-gradient text-on-primary px-10 py-3 rounded-xl font-headline font-bold shadow-lg hover:opacity-90 active:scale-95 transition-all">
+                    Publicar Alerta
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const cepInput = document.querySelector('#id_cep');
+        const bairroInput = document.querySelector('#id_bairro');
+        const cidadeInput = document.querySelector('#id_cidade');
+        const ufInput = document.querySelector('#id_uf');
+        const errorSpan = document.querySelector('#cep-error');
+
+        cepInput.addEventListener('blur', function() {
+            const cep = this.value.replace(/\D/g, '');
+
+            if (cep.length === 8) {
+                bairroInput.value = "Carregando...";
+                cidadeInput.value = "Carregando...";
+                ufInput.value = "...";
+
+                fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.erro) {
+                            cidadeInput.value = data.localidade;
+                            ufInput.value = data.uf;
+                            
+                            // Inteligência para liberar o bairro se o CEP for geral
+                            if (data.bairro) {
+                                bairroInput.value = data.bairro;
+                                bairroInput.setAttribute('readonly', 'readonly');
+                                bairroInput.classList.add('bg-surface-container-high', 'cursor-not-allowed');
+                            } else {
+                                bairroInput.value = "";
+                                bairroInput.removeAttribute('readonly');
+                                bairroInput.classList.remove('bg-surface-container-high', 'cursor-not-allowed');
+                                bairroInput.placeholder = "Digite seu bairro";
+                            }
+                            
+                            errorSpan.classList.add('hidden');
+                        } else {
+                            clearAddressFields();
+                            errorSpan.classList.remove('hidden');
+                        }
+                    })
+                    .catch(() => {
+                        clearAddressFields();
+                        errorSpan.innerText = "Erro de conexão ao buscar o CEP.";
+                        errorSpan.classList.remove('hidden');
+                    });
+            } else if (cep.length > 0) {
+                clearAddressFields();
+                errorSpan.innerText = "Formato de CEP inválido.";
+                errorSpan.classList.remove('hidden');
+            }
+        });
+
+        function clearAddressFields() {
+            bairroInput.value = "";
+            cidadeInput.value = "";
+            ufInput.value = "";
+        }
+    });
+</script>
+
+<style>
+    .cores-wrapper ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        padding-left: 0;
+    }
+    .cores-wrapper li {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .cores-wrapper input[type="checkbox"] {
+        border-radius: 0.25rem;
+        border-color: #c1c6d5;
+        color: #005ab4;
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+    }
+    .cores-wrapper label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #414753;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
